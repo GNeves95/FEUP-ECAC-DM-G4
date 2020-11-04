@@ -26,7 +26,7 @@ def yearDifference(date1, date2):
     num2 = int(date2[0:2])
     return num2-num1
 
-csv_folder = 'bankingdata/'
+csv_folder = '/home/up201306485/Documents/lastchancecac/bankingdata/'
 
 
 
@@ -297,6 +297,8 @@ withdrawal_mean = []
 withdrawal_std = []
 withdrawal_sum = []
 
+recent_balance = []
+
 for account in loan_data['account_id']:
     date = loan_data[loan_data['account_id']==account]['date'][i]
     m1 = dateDelta(date, 0, 1, 0, False)
@@ -305,6 +307,10 @@ for account in loan_data['account_id']:
     y1 = dateDelta(date, 1, 0, 0, False)
 
     balance = trans_data[trans_data['account_id']==account]
+
+    last_balance = balance.loc[balance['date'].idxmax()]['balance']
+
+    recent_balance.append(last_balance)
 
     account_credits = credits[credits['account_id']==account]
     account_withdrawals = withdrawals[withdrawals['account_id']==account]
@@ -427,7 +433,7 @@ for account in loan_data['account_id']:
         if trans > date:
             print(f'{loan_data[loan_data["account_id"]==account]}\n---\n{trans}')'''
 
-new_trans = pd.DataFrame(data={'account_id':account_ids,'balance_m1_min':balance_m1_min,'balance_m1_max':balance_m1_max,'balance_m1_mean':balance_m1_mean,'balance_m1_std':balance_m1_std, 'num_trans_m1': num_trans_m1,'balance_m3_min':balance_m3_min,'balance_m3_max':balance_m3_max,'balance_m3_mean':balance_m3_mean,'balance_m3_std':balance_m3_std, 'num_trans_m3': num_trans_m3,'balance_m6_min':balance_m6_min,'balance_m6_max':balance_m6_max,'balance_m6_mean':balance_m6_mean,'balance_m6_std':balance_m6_std, 'num_trans_m6': num_trans_m6,'balance_y1_min':balance_y1_min,'balance_y1_max':balance_y1_max,'balance_y1_mean':balance_y1_mean,'balance_y1_std':balance_y1_std, 'num_trans_y1': num_trans_y1, 'balance_all_min':balance_min, 'balance_all_max': balance_max, 'balance_all_mean': balance_mean, 'balance_all_std': balance_std, 'num_trans': num_trans,'credit_m1_min':credit_m1_min,'credit_m1_max':credit_m1_max,'credit_m1_mean':credit_m1_mean,'credit_m1_std':credit_m1_std, 'credit_m1_sum': credit_m1_sum,'credit_m3_min':credit_m3_min,'credit_m3_max':credit_m3_max,'credit_m3_mean':credit_m3_mean,'credit_m3_std':credit_m3_std, 'credit_m3_sum': credit_m3_sum,'credit_m6_min':credit_m6_min,'credit_m6_max':credit_m6_max,'credit_m6_mean':credit_m6_mean,'credit_m6_std':credit_m6_std, 'credit_m6_sum': credit_m6_sum,'credit_y1_min':credit_y1_min,'credit_y1_max':credit_y1_max,'credit_y1_mean':credit_y1_mean,'credit_y1_std':credit_y1_std, 'credit_y1_sum': credit_y1_sum, 'credit_all_min':credit_min, 'credit_all_max': credit_max, 'credit_all_mean': credit_mean, 'credit_all_std': credit_std, 'credit_all_sum': credit_sum,'withdrawal_m1_min':withdrawal_m1_min,'withdrawal_m1_max':withdrawal_m1_max,'withdrawal_m1_mean':withdrawal_m1_mean,'withdrawal_m1_std':withdrawal_m1_std, 'withdrawal_m1_sum': withdrawal_m1_sum,'withdrawal_m3_min':withdrawal_m3_min,'withdrawal_m3_max':withdrawal_m3_max,'withdrawal_m3_mean':withdrawal_m3_mean,'withdrawal_m3_std':withdrawal_m3_std, 'withdrawal_m3_sum': withdrawal_m3_sum,'withdrawal_m6_min':withdrawal_m6_min,'withdrawal_m6_max':withdrawal_m6_max,'withdrawal_m6_mean':withdrawal_m6_mean,'withdrawal_m6_std':withdrawal_m6_std, 'withdrawal_m6_sum': withdrawal_m6_sum,'withdrawal_y1_min':withdrawal_y1_min,'withdrawal_y1_max':withdrawal_y1_max,'withdrawal_y1_mean':withdrawal_y1_mean,'withdrawal_y1_std':withdrawal_y1_std, 'withdrawal_y1_sum': withdrawal_y1_sum, 'withdrawal_all_min':withdrawal_min, 'withdrawal_all_max': withdrawal_max, 'withdrawal_all_mean': withdrawal_mean, 'withdrawal_all_std': withdrawal_std, 'withdrawal_all_sum': withdrawal_sum})
+new_trans = pd.DataFrame(data={'account_id':account_ids, 'last_balance': recent_balance,'balance_m1_min':balance_m1_min,'balance_m1_max':balance_m1_max,'balance_m1_mean':balance_m1_mean,'balance_m1_std':balance_m1_std, 'num_trans_m1': num_trans_m1,'balance_m3_min':balance_m3_min,'balance_m3_max':balance_m3_max,'balance_m3_mean':balance_m3_mean,'balance_m3_std':balance_m3_std, 'num_trans_m3': num_trans_m3,'balance_m6_min':balance_m6_min,'balance_m6_max':balance_m6_max,'balance_m6_mean':balance_m6_mean,'balance_m6_std':balance_m6_std, 'num_trans_m6': num_trans_m6,'balance_y1_min':balance_y1_min,'balance_y1_max':balance_y1_max,'balance_y1_mean':balance_y1_mean,'balance_y1_std':balance_y1_std, 'num_trans_y1': num_trans_y1, 'balance_all_min':balance_min, 'balance_all_max': balance_max, 'balance_all_mean': balance_mean, 'balance_all_std': balance_std, 'num_trans': num_trans,'credit_m1_min':credit_m1_min,'credit_m1_max':credit_m1_max,'credit_m1_mean':credit_m1_mean,'credit_m1_std':credit_m1_std, 'credit_m1_sum': credit_m1_sum,'credit_m3_min':credit_m3_min,'credit_m3_max':credit_m3_max,'credit_m3_mean':credit_m3_mean,'credit_m3_std':credit_m3_std, 'credit_m3_sum': credit_m3_sum,'credit_m6_min':credit_m6_min,'credit_m6_max':credit_m6_max,'credit_m6_mean':credit_m6_mean,'credit_m6_std':credit_m6_std, 'credit_m6_sum': credit_m6_sum,'credit_y1_min':credit_y1_min,'credit_y1_max':credit_y1_max,'credit_y1_mean':credit_y1_mean,'credit_y1_std':credit_y1_std, 'credit_y1_sum': credit_y1_sum, 'credit_all_min':credit_min, 'credit_all_max': credit_max, 'credit_all_mean': credit_mean, 'credit_all_std': credit_std, 'credit_all_sum': credit_sum,'withdrawal_m1_min':withdrawal_m1_min,'withdrawal_m1_max':withdrawal_m1_max,'withdrawal_m1_mean':withdrawal_m1_mean,'withdrawal_m1_std':withdrawal_m1_std, 'withdrawal_m1_sum': withdrawal_m1_sum,'withdrawal_m3_min':withdrawal_m3_min,'withdrawal_m3_max':withdrawal_m3_max,'withdrawal_m3_mean':withdrawal_m3_mean,'withdrawal_m3_std':withdrawal_m3_std, 'withdrawal_m3_sum': withdrawal_m3_sum,'withdrawal_m6_min':withdrawal_m6_min,'withdrawal_m6_max':withdrawal_m6_max,'withdrawal_m6_mean':withdrawal_m6_mean,'withdrawal_m6_std':withdrawal_m6_std, 'withdrawal_m6_sum': withdrawal_m6_sum,'withdrawal_y1_min':withdrawal_y1_min,'withdrawal_y1_max':withdrawal_y1_max,'withdrawal_y1_mean':withdrawal_y1_mean,'withdrawal_y1_std':withdrawal_y1_std, 'withdrawal_y1_sum': withdrawal_y1_sum, 'withdrawal_all_min':withdrawal_min, 'withdrawal_all_max': withdrawal_max, 'withdrawal_all_mean': withdrawal_mean, 'withdrawal_all_std': withdrawal_std, 'withdrawal_all_sum': withdrawal_sum})
 
 new_trans.fillna(0, inplace=True)
 
