@@ -4,6 +4,10 @@ import sklearn as sk
 from datetime import date as dt
 from dateutil.relativedelta import relativedelta as rd
 from imblearn.over_sampling import SMOTE
+from sklearn.neighbors import KNeighborsClassifier
+from mlxtend.feature_selection import SequentialFeatureSelector as SFS
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
 
 print(pd.__version__)
 print(sk.__version__)
@@ -521,8 +525,86 @@ mixed_data['age'] = ages
 #print(mixed_data[mixed_data['loan_id'] == 4996].diff())
 
 #print(mixed_data.describe())
+#knn = KNeighborsClassifier(n_neighbors=5)
+col_names = mixed_data.columns.tolist()
+#col_names.remove('loan_id')
+col_names.remove('status')
+#col_names.remove('account_id')
+#print(col_names)
 
-X = mixed_data.loc[:, ~mixed_data.columns.isin(["status","loan_id"])]
+X_df = mixed_data[col_names]
+y_series = mixed_data['status']
+
+# TODO: filter feature selection
+
+from sklearn.feature_selection import VarianceThreshold
+
+#Remove constant features
+constant_filter = VarianceThreshold(threshold=0)
+constant_filter.fit(X_df)
+
+unconst_X = X_df[X_df.columns[constant_filter.get_support(indices=True)]]
+
+#print(unconst_X)
+
+#Remove quasi constant features
+qconstant_filter = VarianceThreshold(threshold=0.01)
+qconstant_filter.fit(unconst_X)
+
+qconst = unconst_X[unconst_X.columns[qconstant_filter.get_support(indices=True)]]
+
+#print(qconst)
+
+#Remove duplicate features
+X_T = qconst.T
+X_T.shape
+unique_features = X_T.drop_duplicates(keep='first').T
+#print(X_T.duplicated().sum())
+#print(unique_features)
+
+#Remove correlated features
+correlated_features = set()
+correlation_matrix = unique_features.corr()
+
+for i in range(len(correlation_matrix.columns)):
+	for j in range(i):
+		if abs(correlation_matrix.iloc[i, j]) > 0.8:
+			colname = correlation_matrix.columns[i]
+			correlated_features.add(colname)
+
+#print(correlated_features)
+unique_features.drop(labels=correlated_features, axis=1, inplace=True)
+#print(unique_features)
+
+#sfs1 = SFS(estimator=knn, k_features=(3, (len(mixed_data.columns)-3)),forward=True, floating=False, scoring='accuracy', cv=5)
+
+#sfs1 = sfs1.fit(X_df, y_series)
+
+#print('best combination (ACC: %.3f): %s\n' % (sfs1.k_score_, sfs1.k_feature_idx_))
+#print(sfs1.subsets_)
+
+#pipe = make_pipeline(StandardScaler(), sfs1)
+
+#pipe.fit(X_df, y_series)
+
+#print('best combination (ACC: %.3f): %s\n' % (sfs1.k_score_, sfs1.k_feature_idx_))
+#print('all subsets:\n', sfs1.subsets_)
+
+#efs1 = EFS(knn, min_features=1, max_features=(len(mixed_data.columns)-3), scoring='accuracy', print_progress=True, cv=5)
+
+#efs1 = efs1.fit(X_df, y_series)
+
+#print('Best accuracy score: %.2f' % efs1.best_score_)
+#print('Best subset (indices):', efs1.best_idx_)
+#print('Best subset (corresponding names):', efs1.best_feature_names_)
+
+# TODO: SMOTE
+
+#best_features = ['loan_id', 'duration', 'frequency', 'account_year', 'account_month', 'account_day', 'disp_type', 'gender', 'birth_year', 'birth_month', 'birth_day', 'less499', 'less1999', 'less9999', 'more10000', 'cities', 'ratioUrb', 'salary', 'unemploymant95', 'unemploymant96', 'enterpreneurs', 'num_trans_m1', 'balance_m3_min', 'num_trans_m3', 'balance_m6_mean', 'num_trans_m6', 'balance_y1_min', 'num_trans_y1', 'balance_all_min', 'balance_all_mean', 'num_trans', 'credit_m1_min', 'credit_m3_min', 'credit_m6_min', 'credit_m6_mean', 'credit_m6_std', 'credit_y1_min', 'credit_y1_mean', 'credit_all_min', 'withdrawal_m1_min', 'withdrawal_m3_min', 'withdrawal_m3_std', 'withdrawal_m6_min', 'withdrawal_y1_min', 'age']
+
+#X = mixed_data.loc[:, ~mixed_data.columns.isin(["status","loan_id"])]
+#X = mixed_data[best_features]
+X= unique_features
 y = mixed_data.status
 
 sm = SMOTE(sampling_strategy='auto', k_neighbors=3,random_state=100)
@@ -533,5 +615,7 @@ new_mixed = pd.concat([pd.DataFrame(X_res), pd.DataFrame(y_res)], axis=1)
 #print(new_mixed.describe())
 #print(new_mixed[new_mixed['status']==-1].describe())
 
-mixed_data.to_csv(csv_folder + 'mixed.csv', index=False, sep=';')
-new_mixed.to_csv(csv_folder + 'new_mixed.csv', index=False, sep=';')
+#mixed_data.to_csv(csv_folder + 'mixed.csv', index=False, sep=';')
+#new_mixed.to_csv(csv_folder + 'new_mixed.csv', index=False, sep=';')
+#new_mixed.to_csv(csv_folder + 'features_mixed.csv', index=False, sep=';')
+new_mixed.to_csv(csv_folder + 'unique_mixed.csv', index=False, sep=';')

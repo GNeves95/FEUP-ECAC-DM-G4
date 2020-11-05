@@ -3,6 +3,7 @@ import pandas as pd
 import sklearn as sk
 from datetime import date as dt
 from dateutil.relativedelta import relativedelta as rd
+from sklearn.ensemble import RandomForestClassifier
 
 print(pd.__version__)
 print(sk.__version__)
@@ -36,6 +37,8 @@ client_data = pd.read_csv(csv_folder + 'client' + '.csv', delimiter=';') #Prepar
 disp_data = pd.read_csv(csv_folder + 'disp' + '.csv', delimiter=';') #Prepared
 district_data = pd.read_csv(csv_folder + 'district' + '.csv', delimiter=';') #Prepared
 trans_data = pd.read_csv(csv_folder + 'trans_test' + '.csv', delimiter=';') #Prepared
+
+unique = pd.read_csv(csv_folder + 'unique_mixed' + '.csv', delimiter=';')
 
 #print(client_data.head())
 
@@ -520,5 +523,28 @@ mixed_data['age'] = ages
 #print(mixed_data[mixed_data['loan_id'] == 4996].diff())
 
 #print(mixed_data.describe())
+#print(mixed_data)
+mixed_data = mixed_data[unique.columns]
+#print(mixed_data)
 
-mixed_data.to_csv(csv_folder + 'mixed_test.csv', index=False, sep=';')
+#mixed_data.to_csv(csv_folder + 'mixed_test.csv', index=False, sep=';')
+
+rf = RandomForestClassifier(n_estimators = 1000, random_state = 42)
+train_features = unique.loc[:,~unique.columns.isin(["status","loan_id"])]
+train_labels = unique['status']
+
+#print(train_features)
+
+rf.fit(train_features, train_labels)
+test_features = mixed_data[train_features.columns]
+
+predictions = rf.predict(test_features)
+
+test_ids = mixed_data['loan_id']
+
+output = {'loan_id': test_ids, 'status': predictions}
+
+outData = pd.DataFrame(data=output)
+
+print(outData)
+outData.to_csv(csv_folder + 'output_rf.csv', index=False, sep=';')
